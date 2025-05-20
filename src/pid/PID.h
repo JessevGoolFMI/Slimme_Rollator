@@ -5,6 +5,9 @@ class DiscretePID {
 public:
   DiscretePID(float setpoint, bool invert);
   float compute(float measurement);
+  void setSetpoint(float newSetpoint) {
+    setpoint = newSetpoint;
+  }
 
 private:
   float setpoint;

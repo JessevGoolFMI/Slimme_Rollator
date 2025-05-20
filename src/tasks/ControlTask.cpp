@@ -22,12 +22,29 @@ void controlTask(void *parameter) {
   odriveL.setState(AXIS_STATE_IDLE);
 
   // Creeer tamme PID regelingen
-  DiscretePID pidR(-0.2, true);
-  DiscretePID pidL(-0.2, false);
+  float setpoint = -0.2;
+  if (xSemaphoreTake(configMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+    setpoint = loopAfstand; // Use loopAfstand from WiFiTask
+    xSemaphoreGive(configMutex);
+  } else {
+    Serial.println("[ControlTask] Failed to take mutex for setpoint");
+  }
+
+  DiscretePID pidR(setpoint, true);
+  DiscretePID pidL(setpoint, false);
 
   bool inClosedLoop = false;  // Houd bij of de ODrives al in closed-loop zijn
 
   for(;;) {
+
+    if (xSemaphoreTake(configMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+      pidR.setSetpoint(loopAfstand);
+      pidL.setSetpoint(loopAfstand);
+      xSemaphoreGive(configMutex);
+    } else {
+      Serial.println("[ControlTask] Failed to take mutex for setpoint update");
+    }
+
     // Als er geen startvoorwaarde is, zet ODrives in IDLE om veiligheid te waarborgen
     if (!startVoorwaarde) {
       if (inClosedLoop) {

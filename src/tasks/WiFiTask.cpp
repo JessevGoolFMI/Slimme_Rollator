@@ -54,30 +54,35 @@ void handleRoot() {
 }
 
 void handleUpdate() {
-  if (server.hasArg("loopAfstand")) {
-    loopAfstand = server.arg("loopAfstand").toFloat();
-    saveValue("loopAfstand", loopAfstand);
-    Serial.print("Loopafstand: "); Serial.println(loopAfstand);
-  }
-  if (server.hasArg("gewicht")) {
-    gewicht = server.arg("gewicht").toFloat();
-    saveValue("gewicht", gewicht);
-    Serial.print("Gewicht: "); Serial.println(gewicht);
-  }
-  if (server.hasArg("lengte")) {
-    lengte = server.arg("lengte").toFloat();
-    saveValue("lengte", lengte);
-    Serial.print("Lengte: "); Serial.println(lengte);
-  }
-  if (server.hasArg("armSterkte")) {
-    armSterkte = server.arg("armSterkte").toFloat();
-    saveValue("armSterkte", armSterkte);
-    Serial.print("Armsterkte: "); Serial.println(armSterkte);
-  }
-  if (server.hasArg("duwkracht")) {
-    duwkracht = server.arg("duwkracht").toFloat();
-    saveValue("duwkracht", duwkracht);
-    Serial.print("Duwkracht: "); Serial.println(duwkracht);
+  if (xSemaphoreTake(configMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+    if (server.hasArg("loopAfstand")) {
+      loopAfstand = server.arg("loopAfstand").toFloat();
+      saveValue("loopAfstand", loopAfstand);
+      Serial.print("Loopafstand: "); Serial.println(loopAfstand);
+    }
+    if (server.hasArg("gewicht")) {
+      gewicht = server.arg("gewicht").toFloat();
+      saveValue("gewicht", gewicht);
+      Serial.print("Gewicht: "); Serial.println(gewicht);
+    }
+    if (server.hasArg("lengte")) {
+      lengte = server.arg("lengte").toFloat();
+      saveValue("lengte", lengte);
+      Serial.print("Lengte: "); Serial.println(lengte);
+    }
+    if (server.hasArg("armSterkte")) {
+      armSterkte = server.arg("armSterkte").toFloat();
+      saveValue("armSterkte", armSterkte);
+      Serial.print("Armsterkte: "); Serial.println(armSterkte);
+    }
+    if (server.hasArg("duwkracht")) {
+      duwkracht = server.arg("duwkracht").toFloat();
+      saveValue("duwkracht", duwkracht);
+      Serial.print("Duwkracht: "); Serial.println(duwkracht);
+    }
+    xSemaphoreGive(configMutex);
+  } else {
+    Serial.println("[WiFiTask] Failed to take mutex for update");
   }
   server.sendHeader("Location", "/");
   server.send(303);
@@ -121,5 +126,11 @@ void wifiTask(void *parameter) {
 }
 
 void initWiFiTask() {
+  // Create mutex before starting tasks
+  configMutex = xSemaphoreCreateMutex();
+  if (configMutex == NULL) {
+    Serial.println("[WiFiTask] Failed to create mutex!");
+  }
+
   xTaskCreatePinnedToCore(wifiTask, "WiFi Task", 4096, NULL, 1, NULL, 0);
 }

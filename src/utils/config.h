@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <freertos/semphr.h>
 #define SDA_R 8
 #define SCL_R 9
 #define SDA_L 36
@@ -11,6 +12,7 @@
 #define ODRIVE_R_TX 14
 #define ODRIVE_L_RX 17
 #define ODRIVE_L_TX 18
+
 
 #define WIFI_SSID "smartrollator" // http://smartrollator.local voor webinterface
 #define WIFI_PASS "12345678"
@@ -36,6 +38,10 @@ extern bool logControlTask;
 extern bool logWiFiTask;
 extern bool logODriveStateTask;
 extern bool logPID;
+
+
+
+SemaphoreHandle_t configMutex = NULL;
 
 void initSerial(unsigned long baud = 115200);
 
