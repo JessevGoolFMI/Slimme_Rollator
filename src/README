@@ -1,0 +1,11 @@
+src/
+├── main.cpp                  # Start van het programma, FreeRTOS setup
+├── tasks/
+│   ├── SensorTask.cpp/.h    # ToF Sensor uitlezing (VL53L1X)
+│   ├── ControlTask.cpp/.h   # tamme PID regeling + ODrive aansturing
+│   ├── InputTask.cpp/.h     # Druksensor en logica
+│   ├── WiFiTask.cpp/.h     # Druksensor en logica    
+├── pid/
+│   └── PID.cpp/.h           # Berekeningen en opgeslagen waardes van de tamme PID regelaar
+└── utils/
+    └── Config.cpp/h             # Constanten, pinnen, initialisatiewaarden
